@@ -54,36 +54,16 @@ convert to a certain section level and call the function. For example:
 
     :call RstSetSection(1)
 
-You may want to create some direct access to this function. I use the
-following:
+The plug-in also remaps some combination of keys in order to simplify
+this function usage.
 
-    " Ctrl-U 1: underline Parts w/ #'s
-    noremap <silent> <C-u>0 :call RstSection('0')<CR>
-    inoremap <silent> <C-u>0 <esc> :call RstSection('0')<CR>
+If you decide to accept my proposed remapping, then you just have to
+press *control key* followed by *u* and then a number from 0 to 6.
 
-    " Ctrl-U 1: underline Parts w/ #'s
-    noremap <silent> <C-u>1 :call RstSection('1')<CR>
-    inoremap <silent> <C-u>1 <esc> :call RstSection('1')<CR>
-
-    " Ctrl-U 2: underline Chapters w/ *'s
-    noremap <silent> <C-u>2 :call RstSection(2)<CR>
-    inoremap <silent> <C-u>2 <esc> :call RstSection(2)<CR>
-
-    " Ctrl-U 3: underline Section Level 1 w/ ='s
-    noremap <silent> <C-u>3 :call RstSection(3)<CR>
-    inoremap <silent> <C-u>3 <esc> :call RstSection(3)<CR>
-
-    " Ctrl-U 4: underline Section Level 2 w/ -'s
-    noremap <silent> <C-u>4 :call RstSection(4)<CR>
-    inoremap <silent> <C-u>4 <esc> :call RstSection(4)<CR>
-
-    " Ctrl-U 5: underline Section Level 3 w/ ^'s
-    noremap <silent> <C-u>5 :call RstSection(5)<CR>
-    inoremap <silent> <C-u>5 <esc> :call RstSection(5)<CR>
-
-    " Ctrl-U 6: underline Section Level 4 w/ ~'s
-    noremap <silent> <C-u>6 :call RstSection(6)<CR>
-    inoremap <silent> <C-u>6 <esc> :call RstSection(6)<CR>
+**Note**: You'll have to press the number with a certain celerity.
+Otherwise, Vim's default configuration will scroll window upwards in
+the buffer in normal mode, and will remove from cursor to the start of
+the line in insert mode.
 
 License
 -------
