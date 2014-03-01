@@ -44,7 +44,7 @@ function! s:RstIsWhiteLine(text)
     return empty(m)
 endfunction
 
-function! RstSetEmptyLineAbove()
+function! s:RstSetEmptyLineAbove()
     " It forces an empty line above current line.
     " If there was a section border, removes it
     let lineno = line('.')
