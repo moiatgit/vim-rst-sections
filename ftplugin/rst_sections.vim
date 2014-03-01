@@ -11,14 +11,6 @@
 " with thanks.
 "
 
-" Only do this when not done yet for this buffer
-" if exists("g:loaded_rst_sections_ftplugin")
-"     finish
-" endif
-" "
-
-let loaded_rst_sections_ftplugin = 1
-
 let s:types = ['#', '*', '=', '-', '^', "'" ]
 
 function! s:RstIsSectionBorder(text)
@@ -99,7 +91,8 @@ function! RstSetSection(level)
 endfunction
 
 " Add mappings, unless the user didn't want this.
-if !exists("no_plugin_maps") && !exists("no_rst_sections_maps")
+
+if !exists("no_rst_sections_maps")
 
     " ctrl-u 0: mark section without any border
     noremap <silent> <c-u>0 :call RstSetSection('0')<cr>

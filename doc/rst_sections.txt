@@ -1,0 +1,59 @@
+*rst_sections.txt* A Vim plugin which XXX
+
+
+                           Vim RST Sections
+
+
+Author: Moisès Gómez
+Plugin Homepage: <http://github.com/moiatgit/vim-rst-sections>
+
+===============================================================================
+CONTENTS *RstSectionsContents*
+
+  1. IntroRstSections.............. |RstSectionsIntroduction|
+  2. Installation ................. |RstSectionsInstallation|
+  3. Usage ........................ |RstSectionsUsage|
+  4. Commands ..................... |RstSectionsCommands|
+  5. FAQ .......................... |RstSectionsFAQ|
+
+===============================================================================
+1. INTRODUCTION *RstSectionsIntroduction*
+                                                                  *RstSections*
+
+Rst Sections is a Vim plugin which XXX
+
+
+===============================================================================
+2. INSTALLATION                                       *RstSectionsInstallation*
+
+If you don't have a preferred installation method, I recommend
+installing Vundle and XXX
+
+===============================================================================
+3. USAGE                                                     *RstSectionsUsage*
+
+XXX
+
+===============================================================================
+4. COMMANDS                                               *RstSectionsCommands*
+
+XXX describe function
+
+===============================================================================
+5. KEY MAPPINGS                                        *RstSectionsKeyMappings*
+
+XXX
+
+
+To disable all key maps:
+>
+  let g:no_rst_sections_maps = 1
+<
+
+XXX try it!
+
+
+===============================================================================
+6. FAQ *RstSectionsFAQ*
+
+a. XXX
