@@ -103,30 +103,30 @@ if !exists("no_plugin_maps") && !exists("no_rst_sections_maps")
 
     " ctrl-u 0: mark section without any border
     noremap <silent> <c-u>0 :call RstSetSection('0')<cr>
-    inoremap <silent> <c-u>0 <esc> :call RstSetSection('0')<cr>
+    inoremap <silent> <c-u>0 <esc>:call RstSetSection('0')<cr>
 
     " ctrl-u 1: mark section as part
     noremap <silent> <c-u>1 :call RstSetSection('1')<cr>
-    inoremap <silent> <c-u>1 <esc> :call RstSetSection('1')<cr>
+    inoremap <silent> <c-u>1 <esc>:call RstSetSection('1')<cr>
 
     " Ctrl-U 2: mark section as chapter
     noremap <silent> <C-u>2 :call RstSetSection(2)<CR>
-    inoremap <silent> <C-u>2 <esc> :call RstSetSection(2)<CR>
+    inoremap <silent> <C-u>2 <esc>:call RstSetSection(2)<CR>
 
     " Ctrl-U 3: mark section as level =
     noremap <silent> <C-u>3 :call RstSetSection(3)<CR>
-    inoremap <silent> <C-u>3 <esc> :call RstSetSection(3)<CR>
+    inoremap <silent> <C-u>3 <esc>:call RstSetSection(3)<CR>
 
     " Ctrl-U 4: mark section as level -
     noremap <silent> <C-u>4 :call RstSetSection(4)<CR>
-    inoremap <silent> <C-u>4 <esc> :call RstSetSection(4)<CR>
+    inoremap <silent> <C-u>4 <esc>:call RstSetSection(4)<CR>
 
     " Ctrl-U 5: mark section as level ^
     noremap <silent> <C-u>5 :call RstSetSection(5)<CR>
-    inoremap <silent> <C-u>5 <esc> :call RstSetSection(5)<CR>
+    inoremap <silent> <C-u>5 <esc>:call RstSetSection(5)<CR>
 
     " Ctrl-U 6: mark section as level "
     noremap <silent> <C-u>6 :call RstSetSection(6)<CR>
-    inoremap <silent> <C-u>6 <esc> :call RstSetSection(6)<CR>
+    inoremap <silent> <C-u>6 <esc>:call RstSetSection(6)<CR>
 endif
 
