@@ -101,27 +101,27 @@ endfunction
 if !exists("no_plugin_maps") && !exists("no_rst_sections_maps")
 
     " Ctrl-U 1: underline Parts w/ #'s
-    noremap <silent> <C-u>1 :call RstSection('1')<CR>
-    inoremap <silent> <C-u>1 <esc> :call RstSection('1')<CR>
+    noremap <silent> <C-u>1 :call RstSetSection('1')<CR>
+    inoremap <silent> <C-u>1 <esc> :call RstSetSection('1')<CR>
 
     " Ctrl-U 2: underline Chapters w/ *'s
-    noremap <silent> <C-u>2 :call RstSection(2)<CR>
-    inoremap <silent> <C-u>2 <esc> :call RstSection(2)<CR>
+    noremap <silent> <C-u>2 :call RstSetSection(2)<CR>
+    inoremap <silent> <C-u>2 <esc> :call RstSetSection(2)<CR>
 
     " Ctrl-U 3: underline Section Level 1 w/ ='s
-    noremap <silent> <C-u>3 :call RstSection(3)<CR>
-    inoremap <silent> <C-u>3 <esc> :call RstSection(3)<CR>
+    noremap <silent> <C-u>3 :call RstSetSection(3)<CR>
+    inoremap <silent> <C-u>3 <esc> :call RstSetSection(3)<CR>
 
     " Ctrl-U 4: underline Section Level 2 w/ -'s
-    noremap <silent> <C-u>4 :call RstSection(4)<CR>
-    inoremap <silent> <C-u>4 <esc> :call RstSection(4)<CR>
+    noremap <silent> <C-u>4 :call RstSetSection(4)<CR>
+    inoremap <silent> <C-u>4 <esc> :call RstSetSection(4)<CR>
 
     " Ctrl-U 5: underline Section Level 3 w/ ^'s
-    noremap <silent> <C-u>5 :call RstSection(5)<CR>
-    inoremap <silent> <C-u>5 <esc> :call RstSection(5)<CR>
+    noremap <silent> <C-u>5 :call RstSetSection(5)<CR>
+    inoremap <silent> <C-u>5 <esc> :call RstSetSection(5)<CR>
 
     " Ctrl-U 6: underline Section Level 4 w/ ~'s
-    noremap <silent> <C-u>6 :call RstSection(6)<CR>
-    inoremap <silent> <C-u>6 <esc> :call RstSection(6)<CR>
+    noremap <silent> <C-u>6 :call RstSetSection(6)<CR>
+    inoremap <silent> <C-u>6 <esc> :call RstSetSection(6)<CR>
 endif
 
