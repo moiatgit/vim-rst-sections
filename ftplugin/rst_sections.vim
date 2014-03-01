@@ -12,10 +12,10 @@
 "
 
 " Only do this when not done yet for this buffer
-if exists("g:loaded_rst_sections_ftplugin")
-    finish
-endif
-"
+" if exists("g:loaded_rst_sections_ftplugin")
+"     finish
+" endif
+" "
 
 let loaded_rst_sections_ftplugin = 1
 
@@ -44,7 +44,7 @@ function! s:RstIsWhiteLine(text)
     return empty(m)
 endfunction
 
-function! s:RstSetEmptyLineAbove()
+function! RstSetEmptyLineAbove()
     " It forces an empty line above current line.
     " If there was a section border, removes it
     let lineno = line('.')
@@ -63,13 +63,14 @@ function! s:RstSetEmptyLineBelow()
     " If there was a section border, removes it
     if line('.') < line('$')
         if s:RstIsSectionBorder(getline(line('.')+1))
-            normal jdd
-        endif
-        if line('.') < line('$') 
-            normal k
-            if ! s:RstIsWhiteLine(getline(line('.')+1))
-                normal ok
+            if line('.') == line('$') - 1
+                normal jdd
+            else
+                normal jddk
             endif
+        endif
+        if ! s:RstIsWhiteLine(getline(line('.')+1))
+            normal ok
         endif
     endif
 endfunction
@@ -100,27 +101,31 @@ endfunction
 " Add mappings, unless the user didn't want this.
 if !exists("no_plugin_maps") && !exists("no_rst_sections_maps")
 
-    " Ctrl-U 1: underline Parts w/ #'s
-    noremap <silent> <C-u>1 :call RstSetSection('1')<CR>
-    inoremap <silent> <C-u>1 <esc> :call RstSetSection('1')<CR>
+    " ctrl-u 0: mark section without any border
+    noremap <silent> <c-u>0 :call RstSetSection('0')<cr>
+    inoremap <silent> <c-u>0 <esc> :call RstSetSection('0')<cr>
 
-    " Ctrl-U 2: underline Chapters w/ *'s
+    " ctrl-u 1: mark section as part
+    noremap <silent> <c-u>1 :call RstSetSection('1')<cr>
+    inoremap <silent> <c-u>1 <esc> :call RstSetSection('1')<cr>
+
+    " Ctrl-U 2: mark section as chapter
     noremap <silent> <C-u>2 :call RstSetSection(2)<CR>
     inoremap <silent> <C-u>2 <esc> :call RstSetSection(2)<CR>
 
-    " Ctrl-U 3: underline Section Level 1 w/ ='s
+    " Ctrl-U 3: mark section as level =
     noremap <silent> <C-u>3 :call RstSetSection(3)<CR>
     inoremap <silent> <C-u>3 <esc> :call RstSetSection(3)<CR>
 
-    " Ctrl-U 4: underline Section Level 2 w/ -'s
+    " Ctrl-U 4: mark section as level -
     noremap <silent> <C-u>4 :call RstSetSection(4)<CR>
     inoremap <silent> <C-u>4 <esc> :call RstSetSection(4)<CR>
 
-    " Ctrl-U 5: underline Section Level 3 w/ ^'s
+    " Ctrl-U 5: mark section as level ^
     noremap <silent> <C-u>5 :call RstSetSection(5)<CR>
     inoremap <silent> <C-u>5 <esc> :call RstSetSection(5)<CR>
 
-    " Ctrl-U 6: underline Section Level 4 w/ ~'s
+    " Ctrl-U 6: mark section as level "
     noremap <silent> <C-u>6 :call RstSetSection(6)<CR>
     inoremap <silent> <C-u>6 <esc> :call RstSetSection(6)<CR>
 endif
