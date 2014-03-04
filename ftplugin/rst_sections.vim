@@ -125,7 +125,6 @@ function! RstSetSection(level)
         if s:RstSeekSectionTitle()
             call s:RstCleanSectionTitle()
             call s:RstCleanSectionBorders()
-
             if a:level > 0
                 let char = s:types[a:level-1]
                 " add border below
@@ -135,6 +134,7 @@ function! RstSetSection(level)
                     normal jyykPj
                 endif
             endif
+            normal 3j
         endif
     endif
 endfunction

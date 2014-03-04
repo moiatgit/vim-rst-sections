@@ -54,6 +54,27 @@ convert to a certain section level and call the function. For example:
 
     :call RstSetSection(1)
 
+The function is able to find out the section title when cursor is:
+
+* just at the section title line
+
+* at the section border below
+
+* at the section border above (when levels 1 or 2)
+
+* at any line above the section title line or section below border
+  line, as far as all the lines until the title or border are white
+  lines (i.e. matching '^\s\*$')
+
+Once section title has been found, it replaces any possible section
+border (even if malformed). Then it cleans up the title (removes
+leading white spaces '\s'.) Then sets the section border corresponding
+to the required level.
+
+Finally it places the cursor three lines below the section title. In
+case of asking for the wrong level, the user can ask for another one
+from this same line and the function will change it properly.
+
 The plug-in also remaps some combination of keys in order to simplify
 this function usage.
 
