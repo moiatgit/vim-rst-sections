@@ -75,6 +75,54 @@ function! s:RstSetEmptyLineBelow()
     endif
 endfunction
 
+function! s:RstSeekSectionTitle()
+    " Finds the right section title line.
+    " Returns false if no title was found
+
+    let initialline = line('.')
+
+    " jump above until current is not at a white line
+    while line('.') > 1 && s:RstIsWhiteLine(getline(line('.')))
+        normal k
+    endwhile
+
+    if line('.') > 1
+        " jump border line
+        let currentline = getline(line('.'))
+        if s:RstIsSectionBorder(getline(line('.')))
+            let currentchar = currentline[0]
+            if s:RstIsWhiteLine(getline(line('.')-1)) && (currentchar == '#' || currentchar == '*')
+                normal j
+            else
+                normal k
+            endif
+        endif
+    endif
+
+    let titlenotfound = s:RstIsWhiteLine(getline(line('.'))) || s:RstIsSectionBorder(getline(line('.')))
+    if titlenotfound
+        execute initialline
+    endif
+    return ! titlenotfound
+endfunction
+
+function! s:RstCleanSectionTitle()
+    " removes whitespaces at the end of the title
+    let expr = '\s\+$'
+    let currentline = getline(line('.'))
+    let m = match(currentline, expr)
+    if m > -1
+        s/\s\+$/
+    endif
+endfunction
+
+function! s:RstCleanSectionBorders()
+    " cleans any possible section borders (even if they're malformed)
+    call s:RstSetEmptyLineBelow()
+    call s:RstSetEmptyLineAbove()
+endfunction
+
+
 function! RstSetSection(level)
     " sets current line borders
     " level 0: no borders at all
@@ -82,17 +130,18 @@ function! RstSetSection(level)
     " level 3-6: just border below (=, -, ^, ")
     " any other: do nothing
     if a:level >= 0 && a:level <= 6
-        " clean possible previous level or malformed section line
-        call s:RstSetEmptyLineBelow()
-        call s:RstSetEmptyLineAbove()
+        if s:RstSeekSectionTitle()
+            call s:RstCleanSectionTitle()
+            call s:RstCleanSectionBorders()
 
-        if a:level > 0
-            let char = s:types[a:level-1]
-            " add border below
-            execute 'normal yypVr' . char . 'k'
-            if a:level == 1 || a:level == 2
-                " add border above
-                normal jyykPj
+            if a:level > 0
+                let char = s:types[a:level-1]
+                " add border below
+                execute 'normal yypVr' . char . 'k'
+                if a:level == 1 || a:level == 2
+                    " add border above
+                    normal jyykPj
+                endif
             endif
         endif
     endif
