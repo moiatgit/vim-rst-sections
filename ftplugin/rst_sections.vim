@@ -28,6 +28,22 @@ function! s:RstIsSectionBorder(text)
     return result
 endfunction
 
+function! s:RstGetSectionLevelFromChar(ch)
+    " returns section level from character ch
+    " if ch doesn't correspond to any section level, it returns 0
+    let result = 0
+    let level = 0
+    for c in s:types
+        let level += 1
+        if c == a:ch
+            let result = level
+            break
+        endif
+    endfor
+    return result
+endfunction
+
+
 function! s:RstIsWhiteLine(text)
     " returns true if text is an empty line or just contains white
     " spaces
@@ -67,17 +83,19 @@ function! s:RstSetEmptyLineBelow()
     endif
 endfunction
 
+function! s:RstJumpWhiteLinesAbove()
+    " jumps above until current is not at a white line
+    while line('.') > 1 && s:RstIsWhiteLine(getline(line('.')))
+        normal k
+    endwhile
+endfunction
+
 function! s:RstSeekSectionTitle()
     " Finds the right section title line.
     " Returns false if no title was found
 
     let initialline = line('.')
-
-    " jump above until current is not at a white line
-    while line('.') > 1 && s:RstIsWhiteLine(getline(line('.')))
-        normal k
-    endwhile
-
+    call s:RstJumpWhiteLinesAbove()
     if line('.') > 1
         " jump border line
         let currentline = getline(line('.'))
@@ -139,6 +157,19 @@ function! RstSetSection(level)
     endif
 endfunction
 
+function! s:RstGetCurrentSectionChar()
+    " returns current section char. Empty char if it is not a section
+    " assumes cursor is at section title or at section border
+    let currentchar = ""
+    let currentline = getline(line('.'))
+    if ! s:RstIsSectionBorder(currentline)
+        let currentline = getline(line('.')+1)
+    endif
+    if s:RstIsSectionBorder(currentline)
+        let currentchar = currentline[0]
+    endif
+    return currentchar
+endfunction
 
 function! RstGoPrevSection()
     " sets current line to the previous section (is circular)
@@ -166,22 +197,48 @@ function! RstGoNextSection()
     " sets current line to the next section (is circular)
     let initline = line('.')
 
-    " check case current line is border section
-    if s:RstIsSectionBorder(getline(initline))
-        normal j
+    " current paragraph can't be next section
+    normal )
 
-        " check case currrent line is section title for levels 1 or 2
-    elseif s:RstIsSectionBorder(getline(line('.')-1)) && s:RstIsSectionBorder(getline(line('.')+1))
-        normal 2k
-    endif
-
-    " search previous section border 
-    ?^[-#*=^']\+$
+    " search next section border 
+    /^[-#*=^']\+$
 
     if s:RstIsSectionBorder(getline(line('.')))
-        normal k
-    else
-        execute initline
+        let currentchar = getline(line('.'))[0]
+        if currentchar == '#' || currentchar == '*'
+            normal j
+        else
+            normal k
+        endif
+    endif
+endfunction
+
+function! RstIncrSectionLevel()
+    " increments the level of the section at current line
+    " If no section at current line, it assumes level 0
+    " Well formed section is not required. It assumes 
+    " section border below as level guide.
+    if s:RstSeekSectionTitle()
+        let currentchar = s:RstGetCurrentSectionChar()
+        let currentlevel = s:RstGetSectionLevelFromChar(currentchar)
+        let newlevel = currentlevel - 1
+        if newlevel < 0
+            let newlevel = len(s:types)
+        endif
+        call RstSetSection(newlevel)
+    endif
+endfunction
+
+function! RstDecrSectionLevel()
+    " decrements the level of the section at current line
+    " If no section at current line, it assumes level 0
+    " Well formed section is not required. It assumes 
+    " section border below as level guide.
+    if s:RstSeekSectionTitle()
+        let currentchar = s:RstGetCurrentSectionChar()
+        let currentlevel = s:RstGetSectionLevelFromChar(currentchar)
+        let newlevel = (currentlevel + 1) % (len(s:types) + 1)
+        call RstSetSection(newlevel)
     endif
 endfunction
 
@@ -189,37 +246,49 @@ endfunction
 
 if !exists("no_rst_sections_maps")
 
-    " ctrl-u 0: mark section without any border
-    noremap <silent> <c-u>0 :call RstSetSection('0')<cr>
-    inoremap <silent> <c-u>0 <esc>:call RstSetSection('0')<cr>
+    " <leader> 0: mark section without any border
+    noremap <silent> <leader>0 :call RstSetSection('0')<cr>
+    inoremap <silent> <leader>0 <esc>:call RstSetSection('0')<cr>
 
-    " ctrl-u 1: mark section as part
-    noremap <silent> <c-u>1 :call RstSetSection('1')<cr>
-    inoremap <silent> <c-u>1 <esc>:call RstSetSection('1')<cr>
+    " <leader> 1: mark section as part
+    noremap <silent> <leader>1 :call RstSetSection('1')<cr>
+    inoremap <silent> <leader>1 <esc>:call RstSetSection('1')<cr>
 
-    " Ctrl-U 2: mark section as chapter
-    noremap <silent> <C-u>2 :call RstSetSection(2)<CR>
-    inoremap <silent> <C-u>2 <esc>:call RstSetSection(2)<CR>
+    " <leader> 2: mark section as chapter
+    noremap <silent> <leader>2 :call RstSetSection(2)<CR>
+    inoremap <silent> <leader>2 <esc>:call RstSetSection(2)<CR>
 
-    " Ctrl-U 3: mark section as level =
-    noremap <silent> <C-u>3 :call RstSetSection(3)<CR>
-    inoremap <silent> <C-u>3 <esc>:call RstSetSection(3)<CR>
+    " <leader> 3: mark section as level =
+    noremap <silent> <leader>3 :call RstSetSection(3)<CR>
+    inoremap <silent> <leader>3 <esc>:call RstSetSection(3)<CR>
 
-    " Ctrl-U 4: mark section as level -
-    noremap <silent> <C-u>4 :call RstSetSection(4)<CR>
-    inoremap <silent> <C-u>4 <esc>:call RstSetSection(4)<CR>
+    " <leader> 4: mark section as level -
+    noremap <silent> <leader>4 :call RstSetSection(4)<CR>
+    inoremap <silent> <leader>4 <esc>:call RstSetSection(4)<CR>
 
-    " Ctrl-U 5: mark section as level ^
-    noremap <silent> <C-u>5 :call RstSetSection(5)<CR>
-    inoremap <silent> <C-u>5 <esc>:call RstSetSection(5)<CR>
+    " <leader> 5: mark section as level ^
+    noremap <silent> <leader>5 :call RstSetSection(5)<CR>
+    inoremap <silent> <leader>5 <esc>:call RstSetSection(5)<CR>
 
-    " Ctrl-U 6: mark section as level "
-    noremap <silent> <C-u>6 :call RstSetSection(6)<CR>
-    inoremap <silent> <C-u>6 <esc>:call RstSetSection(6)<CR>
+    " <leader> 6: mark section as level "
+    noremap <silent> <leader>6 :call RstSetSection(6)<CR>
+    inoremap <silent> <leader>6 <esc>:call RstSetSection(6)<CR>
 
-    " Ctr-U k: jumps to the previous section title
-    noremap <silent> <C-u>k :call RstGoPrevSection()<CR>
-    inoremap <silent> <C-u>k <esc>:call RstGoPrevSection()<CR>
+    " <leader> k: jumps to the previous section title
+    noremap <silent> <leader>k :call RstGoPrevSection()<CR>
+    inoremap <silent> <leader>k <esc>:call RstGoPrevSection()<CR>
+
+    " <leader> j: jumps to the next section title
+    noremap <silent> <leader>j :call RstGoNextSection()<CR>
+    inoremap <silent> <leader>j <esc>:call RstGoNextSection()<CR>
+
+    " <leader> a: increments section level
+    noremap <silent> <leader>a :call RstIncrSectionLevel()<CR>
+    inoremap <silent> <leader>a <esc>:call RstIncrSectionLevel()<CR>
+
+    " <leader> x: decrements section level
+    noremap <silent> <leader>x :call RstDecrSectionLevel()<CR>
+    inoremap <silent> <leader>x <esc>:call RstDecrSectionLevel()<CR>
 
 endif
 
