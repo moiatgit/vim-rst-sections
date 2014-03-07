@@ -134,8 +134,54 @@ function! RstSetSection(level)
                     normal jyykPj
                 endif
             endif
-            normal 3j
+            normal 2j
         endif
+    endif
+endfunction
+
+
+function! RstGoPrevSection()
+    " sets current line to the previous section (is circular)
+    let initline = line('.')
+
+    " check case current line is border section
+    if s:RstIsSectionBorder(getline(initline))
+        normal k
+    elseif s:RstIsSectionBorder(getline(line('.')-1)) && s:RstIsSectionBorder(getline(line('.')+1))
+        " case currrent line is section title for levels 1 or 2
+        normal 2k
+    endif
+
+    " search previous section border 
+    ?^[-#*=^']\+$
+
+    if s:RstIsSectionBorder(getline(line('.')))
+        normal k
+    else
+        execute initline
+    endif
+endfunction
+
+function! RstGoNextSection()
+    " sets current line to the next section (is circular)
+    let initline = line('.')
+
+    " check case current line is border section
+    if s:RstIsSectionBorder(getline(initline))
+        normal j
+
+        " check case currrent line is section title for levels 1 or 2
+    elseif s:RstIsSectionBorder(getline(line('.')-1)) && s:RstIsSectionBorder(getline(line('.')+1))
+        normal 2k
+    endif
+
+    " search previous section border 
+    ?^[-#*=^']\+$
+
+    if s:RstIsSectionBorder(getline(line('.')))
+        normal k
+    else
+        execute initline
     endif
 endfunction
 
@@ -170,5 +216,10 @@ if !exists("no_rst_sections_maps")
     " Ctrl-U 6: mark section as level "
     noremap <silent> <C-u>6 :call RstSetSection(6)<CR>
     inoremap <silent> <C-u>6 <esc>:call RstSetSection(6)<CR>
+
+    " Ctr-U k: jumps to the previous section title
+    noremap <silent> <C-u>k :call RstGoPrevSection()<CR>
+    inoremap <silent> <C-u>k <esc>:call RstGoPrevSection()<CR>
+
 endif
 

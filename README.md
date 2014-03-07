@@ -71,9 +71,11 @@ border (even if malformed). Then it cleans up the title (removes
 leading white spaces '\s'.) Then sets the section border corresponding
 to the required level.
 
-Finally it places the cursor three lines below the section title. In
-case of asking for the wrong level, the user can ask for another one
-from this same line and the function will change it properly.
+Finally it places the cursor two lines below the section title so
+creating a new line (command o) is enough for starting to write a new
+section. In case of asking for the wrong level, the user can ask for
+another one from this same line and the function will change it
+properly.
 
 The plug-in also remaps some combination of keys in order to simplify
 this function usage.
