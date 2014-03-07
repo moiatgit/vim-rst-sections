@@ -166,22 +166,21 @@ function! RstGoNextSection()
     " sets current line to the next section (is circular)
     let initline = line('.')
 
-    " check case current line is border section
-    if s:RstIsSectionBorder(getline(initline))
-        normal j
 
-        " check case currrent line is section title for levels 1 or 2
-    elseif s:RstIsSectionBorder(getline(line('.')-1)) && s:RstIsSectionBorder(getline(line('.')+1))
-        normal 2k
-    endif
+    " lets go after current paragraph since current one can't be next section
+    normal )
 
-    " search previous section border 
-    ?^[-#*=^']\+$
+    " search next section border 
+    /^[-#*=^']\+$
 
     if s:RstIsSectionBorder(getline(line('.')))
-        normal k
-    else
-        execute initline
+        let currentchar = getline(line('.'))[0]
+        echo "current char ". currentchar
+        if currentchar == '#' || currentchar == '*'
+            normal j
+        else
+            normal k
+        endif
     endif
 endfunction
 
@@ -220,6 +219,10 @@ if !exists("no_rst_sections_maps")
     " Ctr-U k: jumps to the previous section title
     noremap <silent> <C-u>k :call RstGoPrevSection()<CR>
     inoremap <silent> <C-u>k <esc>:call RstGoPrevSection()<CR>
+
+    " Ctr-U j: jumps to the next section title
+    noremap <silent> <C-u>j :call RstGoNextSection()<CR>
+    inoremap <silent> <C-u>j <esc>:call RstGoNextSection()<CR>
 
 endif
 
