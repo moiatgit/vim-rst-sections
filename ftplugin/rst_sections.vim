@@ -185,46 +185,72 @@ function! s:RstGetCurrentSectionLevel()
     return s:RstGetSectionLevelFromChar(sectionchar)
 endfunction
 
+function! s:RstGetTitleLineofASection(lineno)
+    " returns the line corresponding to the title of a section in
+    " the lineno or 0 if it is not a section at all.
+    " lineno must be the title or any border of a section.
+    " It doesn't have to be a well formed section. With some border
+    " below/above a non white line it suffices
+    let result = 0
+    let currentline = getline(a:lineno)
+    if ! s:RstIsWhiteLine(currentline)
+        if s:RstIsSectionBorder(currentline)
+            if ! s:RstIsWhiteLine(getline(a:lineno - 1))
+                let result = a:lineno - 1
+            elseif ! s:RstIsWhiteLine(getline(a:lineno + 1))
+                let result = a:lineno + 1
+            endif
+        elseif s:RstIsSectionBorder(getline(a:lineno - 1)) || s:RstIsSectionBorder(getline(a:lineno + 1)) 
+            let result = a:lineno
+        endif
+    endif
+    return result
+endfunction
+
 function! RstGoPrevSection()
     " sets current line to the previous section (is circular)
     let initline = line('.')
 
-    " check case current line is border section
-    if s:RstIsSectionBorder(getline(initline))
+    while 1
+        " current line can't be next section
         normal k
-    elseif s:RstIsSectionBorder(getline(line('.')-1)) && s:RstIsSectionBorder(getline(line('.')+1))
-        " case currrent line is section title for levels 1 or 2
-        normal 2k
-    endif
 
-    " search previous section border 
-    ?^[-#*=^']\+$
+        " search next section border 
+        execute "silent! ?^[-#*=^']\\+$"
+        if ! s:RstIsSectionBorder(getline(line('.')))
+            execute initline
+            break
+        endif
 
-    if s:RstIsSectionBorder(getline(line('.')))
-        normal k
-    else
-        execute initline
-    endif
+        let lineno = s:RstGetTitleLineofASection(line('.'))
+        if lineno != 0
+            execute lineno
+            break
+        endif
+    endwhile
 endfunction
 
 function! RstGoNextSection()
     " sets current line to the next section (is circular)
     let initline = line('.')
 
-    " current paragraph can't be next section
-    normal )
+    while 1
+        " current line can't be next section
+        normal j
 
-    " search next section border 
-    /^[-#*=^']\+$
-
-    if s:RstIsSectionBorder(getline(line('.')))
-        let currentchar = getline(line('.'))[0]
-        if currentchar == '#' || currentchar == '*'
-            normal j
-        else
-            normal k
+        " search next section border 
+        execute "silent! /^[-#*=^']\\+$"
+        if ! s:RstIsSectionBorder(getline(line('.')))
+            execute initline
+            break
         endif
-    endif
+
+        let lineno = s:RstGetTitleLineofASection(line('.'))
+        if lineno != 0
+            execute lineno
+            break
+        endif
+    endwhile
 endfunction
 
 function! RstIncrSectionLevel()
@@ -351,6 +377,10 @@ if !exists("no_rst_sections_maps")
     " <leader>s x: decrements section level
     noremap <silent> <leader>sx :call RstDecrSectionLevel()<CR>
     inoremap <silent> <leader>sx <esc>:call RstDecrSectionLevel()<CR>
+
+    " <leader>s l: labelizes current line
+    noremap <silent> <leader>sl :call RstSectionLabelize()<CR>
+    inoremap <silent> <leader>sl <esc>:call RstSectionLabelize()<CR>
 
 endif
 

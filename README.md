@@ -98,19 +98,7 @@ For the next section, type:
 
     :call RstGoNextSection()
 
-**Note 1**: in current implementation, these functions can be fooled
-by sequences of characters that could be, but are not, section
-borders. In the next example, calling RstGoNextSection() would jump to
-the last line with dashes althoug they're not a section.
-
-    This is a section
-    -----------------
-
-    Some text «here the current line»
-
-    ----
-
-**Note 2**: current implementation is circular, so once reached the
+**Note**: current implementation is circular, so once reached the
 begining/end of the buffer, these functions will continue searching
 the previous/next section by the end/begining of the buffer.
 
