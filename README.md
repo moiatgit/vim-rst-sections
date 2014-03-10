@@ -120,6 +120,80 @@ border.
 **Note 2**: current implementation is circular, so once reached the
 top/bottom level, these functions will set the last/first level.
 
+RstSectionLabelize()
+^^^^^^^^^^^^^^^^^^^^
+
+Definition: a label is any sequence of characters from the start of a
+line followed by a white space, then a number (one or more digits) or
+a # sign, then a dot and a white space. Then it comes the title of the
+label.
+
+For example, the following are acceptable labels
+
+    Figure 1. Title of the figure
+
+    Exercise #. Title of the exercise
+
+    Chapter 23. Title of the chapter
+
+    A label with spaces 3. Title of a label with spaces
+
+Let's suppose we are interested in labels like "Example". Our buffer
+could contain one or more lines starting with this label. These lines
+could also be a section (i.e. they could have section borders)
+
+In this situation, place the cursor in **any** line starting with this
+label, and execute the following:
+
+    :call RstSectionLabelize()
+
+Now, all the lines starting with the label will be sequentially
+numbered from the first label's number in the buffer, and will match
+its section level.
+
+If you are interested in changing the section level of all the labels,
+or simply start by a number different from 1, just change the first
+appearance of the label in the buffer accordingly.
+
+For example, consider the buffer before calling RstSectionLabelize()
+
+    text
+
+    Example 2. my example 2
+    -----------------------
+
+    text
+
+    Example #. another example
+    ==========================
+
+    text
+
+    Example 983. Final example
+
+    more text
+
+Having the cursor at line of example 983, and calling then the
+function, the resulting buffer will be
+
+    text
+
+    Example 2. my example 2
+    -----------------------
+
+    text
+
+    Example 3. another example
+    --------------------------
+
+    text
+
+    Example 4. Final example
+    ------------------------
+
+    more text
+
+
 Key mapings
 -----------
 
@@ -135,6 +209,8 @@ press your *leader* key followed by *s* and then:
 
 * a or x to increase or decrease the section level
 
+* l to labelize
+
 **Note 1**: If you have not defined your leader key in your .vimrc, it probably will be mapped to character "\". So, for example
 
     " set current line to section level 3
@@ -144,7 +220,7 @@ press your *leader* key followed by *s* and then:
     \sk
 
     " decrease level of current section
-    \sxº
+    \sx
 
 **Note 2**: Remaps are done for *normal* and for *insert* modes.
 

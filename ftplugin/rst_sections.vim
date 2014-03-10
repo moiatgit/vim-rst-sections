@@ -13,6 +13,26 @@
 
 let s:types = ['#', '*', '=', '-', '^', "'" ]
 
+function! s:RstCurrentLineIsSectionBorder()
+    " returns true if current line is a section border
+    return s:RstLineIsSectionBorder(line('.'))
+endfunction
+
+function! s:RstPrevLineIsSectionBorder()
+    " returns true if previous line is a section border
+    return s:RstLineIsSectionBorder(line('.') - 1)
+endfunction
+
+function! s:RstNextLineIsSectionBorder()
+    " returns true if next line is a section border
+    return s:RstLineIsSectionBorder(line('.') + 1)
+endfunction
+
+function! s:RstLineIsSectionBorder(lineno)
+    " returns true is lineno is a section border
+    return s:RstIsSectionBorder(getline(a:lineno))
+endfunction
+
 function! s:RstIsSectionBorder(text)
     " returns true if text is a section border
     let result = 0
@@ -43,6 +63,21 @@ function! s:RstGetSectionLevelFromChar(ch)
     return result
 endfunction
 
+function! s:RstCurrentLineIsWhiteLine()
+    " returns true if current line just contains white spaces
+    return s:RstIsWhiteLine(getline(line('.')))
+endfunction
+
+function! s:RstPrevLineIsWhiteLine()
+    " returns true if previous line is a white line
+    return s:RstIsWhiteLine(getline(line('.') - 1))
+endfunction
+
+function! s:RstNextLineIsWhiteLine()
+    " returns true if next line is a white line
+    return s:RstIsWhiteLine(getline(line('.') + 1))
+endfunction
+
 function! s:RstIsWhiteLine(text)
     " returns true if text is an empty line or just contains white
     " spaces
@@ -56,10 +91,10 @@ function! s:RstSetEmptyLineAbove()
     " If there was a section border, removes it
     let lineno = line('.')
     if line('.') > 1
-        if s:RstIsSectionBorder(getline(line('.')-1))
+        if s:RstPrevLineIsSectionBorder()
             normal kdd
         endif
-        if ! s:RstIsWhiteLine(getline(line('.')-1))
+        if ! s:RstPrevLineIsWhiteLine()
             normal Oj
         endif
     endif
@@ -69,14 +104,14 @@ function! s:RstSetEmptyLineBelow()
     " It forces an empty line below current line
     " If there was a section border, removes it
     if line('.') < line('$')
-        if s:RstIsSectionBorder(getline(line('.')+1))
+        if s:RstNextLineIsSectionBorder()
             if line('.') == line('$') - 1
                 normal jdd
             else
                 normal jddk
             endif
         endif
-        if ! s:RstIsWhiteLine(getline(line('.')+1))
+        if ! s:RstNextLineIsWhiteLine()
             normal ok
         endif
     endif
@@ -84,7 +119,7 @@ endfunction
 
 function! s:RstJumpWhiteLinesAbove()
     " jumps above until current is not at a white line
-    while line('.') > 1 && s:RstIsWhiteLine(getline(line('.')))
+    while line('.') > 1 && s:RstCurrentLineIsWhiteLine()
         normal k
     endwhile
 endfunction
@@ -92,27 +127,15 @@ endfunction
 function! s:RstSeekSectionTitle()
     " Finds the right section title line.
     " Returns false if no title was found
-
-    let initialline = line('.')
+    let initline = line('.')
     call s:RstJumpWhiteLinesAbove()
-    if line('.') > 1
-        " jump border line
-        let currentline = getline(line('.'))
-        if s:RstIsSectionBorder(getline(line('.')))
-            let currentchar = currentline[0]
-            if s:RstIsWhiteLine(getline(line('.')-1)) && (currentchar == '#' || currentchar == '*')
-                normal j
-            else
-                normal k
-            endif
-        endif
+    let newline = s:RstGetTitleLineofASection(line('.'))
+    if newline > 0
+        execute newline
+    else
+        execute initline
     endif
-
-    let titlenotfound = s:RstIsWhiteLine(getline(line('.'))) || s:RstIsSectionBorder(getline(line('.')))
-    if titlenotfound
-        execute initialline
-    endif
-    return ! titlenotfound
+    return newline > 0
 endfunction
 
 function! s:RstCleanSectionTitle()
@@ -136,7 +159,14 @@ function! s:RstSetSectionLevel(level)
     " returns 1 if done
     let result = 0
     if a:level >= 0 && a:level <= 6
-        if s:RstSeekSectionTitle()
+        let initline = line('.')
+        call s:RstJumpWhiteLinesAbove()
+        let newline = s:RstGetTitleLineofASection(line('.'))
+        if newline > 0
+            execute newline
+        endif
+        if ! s:RstCurrentLineIsWhiteLine() && ! s:RstCurrentLineIsSectionBorder()
+
             call s:RstCleanSectionTitle()
             call s:RstCleanSectionBorders()
             if a:level > 0
@@ -148,6 +178,7 @@ function! s:RstSetSectionLevel(level)
                     normal jyykPj
                 endif
             endif
+            let result = 1
         endif
     endif
     return result
@@ -169,12 +200,9 @@ function! s:RstGetCurrentSectionChar()
     " returns current section char. Empty char if it is not a section
     " assumes cursor is at section title or at section border
     let currentchar = ""
-    let currentline = getline(line('.'))
-    if ! s:RstIsSectionBorder(currentline)
-        let currentline = getline(line('.')+1)
-    endif
-    if s:RstIsSectionBorder(currentline)
-        let currentchar = currentline[0]
+    let titleline = s:RstGetTitleLineofASection(line('.'))
+    if titleline > 0
+        let currentchar = getline(line('.')+1)[0]
     endif
     return currentchar
 endfunction
@@ -190,7 +218,9 @@ function! s:RstGetTitleLineofASection(lineno)
     " the lineno or 0 if it is not a section at all.
     " lineno must be the title or any border of a section.
     " It doesn't have to be a well formed section. With some border
-    " below/above a non white line it suffices
+    " below/above a non white line title it suffices.
+    " It also accepts as a title a non white line preceded and
+    " followed by white lines
     let result = 0
     let currentline = getline(a:lineno)
     if ! s:RstIsWhiteLine(currentline)
@@ -200,7 +230,7 @@ function! s:RstGetTitleLineofASection(lineno)
             elseif ! s:RstIsWhiteLine(getline(a:lineno + 1))
                 let result = a:lineno + 1
             endif
-        elseif s:RstIsSectionBorder(getline(a:lineno - 1)) || s:RstIsSectionBorder(getline(a:lineno + 1)) 
+        elseif s:RstPrevLineIsSectionBorder() || s:RstNextLineIsSectionBorder() || (s:RstPrevLineIsWhiteLine() && s:RstNextLineIsWhiteLine())
             let result = a:lineno
         endif
     endif
@@ -210,18 +240,15 @@ endfunction
 function! RstGoPrevSection()
     " sets current line to the previous section (is circular)
     let initline = line('.')
-
     while 1
         " current line can't be next section
         normal k
-
         " search next section border 
         execute "silent! ?^[-#*=^']\\+$"
-        if ! s:RstIsSectionBorder(getline(line('.')))
+        if ! s:RstCurrentLineIsSectionBorder()
             execute initline
             break
         endif
-
         let lineno = s:RstGetTitleLineofASection(line('.'))
         if lineno != 0
             execute lineno
@@ -233,18 +260,15 @@ endfunction
 function! RstGoNextSection()
     " sets current line to the next section (is circular)
     let initline = line('.')
-
     while 1
         " current line can't be next section
         normal j
-
         " search next section border 
         execute "silent! /^[-#*=^']\\+$"
-        if ! s:RstIsSectionBorder(getline(line('.')))
+        if ! s:RstCurrentLineIsSectionBorder()
             execute initline
             break
         endif
-
         let lineno = s:RstGetTitleLineofASection(line('.'))
         if lineno != 0
             execute lineno
