@@ -43,7 +43,6 @@ function! s:RstGetSectionLevelFromChar(ch)
     return result
 endfunction
 
-
 function! s:RstIsWhiteLine(text)
     " returns true if text is an empty line or just contains white
     " spaces
@@ -132,13 +131,10 @@ function! s:RstCleanSectionBorders()
     call s:RstSetEmptyLineAbove()
 endfunction
 
-
-function! RstSetSection(level)
-    " sets current line borders
-    " level 0: no borders at all
-    " level 1-2: borders above and below (#, *)
-    " level 3-6: just border below (=, -, ^, ")
-    " any other: do nothing
+function! s:RstSetSectionLevel(level)
+    " sets section level for current line
+    " returns 1 if done
+    let result = 0
     if a:level >= 0 && a:level <= 6
         if s:RstSeekSectionTitle()
             call s:RstCleanSectionTitle()
@@ -152,8 +148,20 @@ function! RstSetSection(level)
                     normal jyykPj
                 endif
             endif
-            normal 2j
         endif
+    endif
+    return result
+endfunction
+
+function! RstSetSection(level)
+    " sets current line borders
+    " level 0: no borders at all
+    " level 1-2: borders above and below (#, *)
+    " level 3-6: just border below (=, -, ^, ")
+    " any other: do nothing
+    if s:RstSetSectionLevel(a:level)
+        " reposition cursor
+        normal 2j
     endif
 endfunction
 
@@ -169,6 +177,12 @@ function! s:RstGetCurrentSectionChar()
         let currentchar = currentline[0]
     endif
     return currentchar
+endfunction
+
+function! s:RstGetCurrentSectionLevel()
+    " returns the current section level
+    let sectionchar = s:RstGetCurrentSectionChar()
+    return s:RstGetSectionLevelFromChar(sectionchar)
 endfunction
 
 function! RstGoPrevSection()
@@ -219,8 +233,7 @@ function! RstIncrSectionLevel()
     " Well formed section is not required. It assumes 
     " section border below as level guide.
     if s:RstSeekSectionTitle()
-        let currentchar = s:RstGetCurrentSectionChar()
-        let currentlevel = s:RstGetSectionLevelFromChar(currentchar)
+        let currentlevel = s:RstGetCurrentSectionLevel()
         let newlevel = currentlevel - 1
         if newlevel < 0
             let newlevel = len(s:types)
@@ -235,11 +248,61 @@ function! RstDecrSectionLevel()
     " Well formed section is not required. It assumes 
     " section border below as level guide.
     if s:RstSeekSectionTitle()
-        let currentchar = s:RstGetCurrentSectionChar()
-        let currentlevel = s:RstGetSectionLevelFromChar(currentchar)
+        let currentlevel = s:RstGetCurrentSectionLevel()
         let newlevel = (currentlevel + 1) % (len(s:types) + 1)
         call RstSetSection(newlevel)
     endif
+endfunction
+
+function! s:RstGetLabel()
+    " returns the label of the current line
+    " A label is a string followed by a white space, followed by a
+    " number (one or more digits) or sign '#', and then followed by a
+    " dot and a white space.
+    let expr  = '^\zs.\{-\}\ze \(\(\d\+\)\|#\)\. '
+    let text  = getline(line('.'))
+    let label = matchstr(text, expr)
+    return label
+endfunction
+
+function! RstSectionLabelize()
+    " Considers current line started by a label followed by a number
+    " otherwise ends without effect.
+    " Once the label is identified, it searches the first time the
+    " label appears at the buffer and formats the rest of the lines
+    " starting with this label in the following way:
+    "   - renumbers sequentially from first label appearance
+    "   - copies the section level of the first label
+    let label = s:RstGetLabel()
+    if label != ""
+        let exprtitle = '^' . label .  ' \(\(\d\+\)\|#\)\. \zs.*$'
+        let currentline = line('.')
+        0
+        let expr = '^' . label . ' \zs\(\(\d\+\)\|#\)\ze\. '
+        execute "silent normal! /" . expr . "\r"
+        let firstline = line('.')
+        let nr = matchstr(getline(firstline), expr)
+        if nr == "#"
+            let nr = 1
+        endif
+        let level = s:RstGetCurrentSectionLevel()
+        while 1
+            let title = matchstr(getline(line('.')), exprtitle)
+            let newcontent = label . " " . nr . ". " . title
+            execute "silent normal! 0DI" . newcontent
+            call s:RstSetSectionLevel(level)
+            normal 2j
+            execute "silent normal! /" . expr . "\r"
+            let nr = nr + 1
+            if line('.') <= firstline
+                break
+            endif
+        endwhile
+        execute currentline
+    endif
+    " now I'm able to find out all the labels in the buffer
+    " next step is to renumber labels from first nr
+    " then apply section level
 endfunction
 
 " Add mappings, unless the user didn't want this.
