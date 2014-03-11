@@ -309,7 +309,7 @@ function! s:RstGetLabel()
     " A label is a string followed by a white space, followed by a
     " number (one or more digits) or sign '#', and then followed by a
     " dot and a white space.
-    let expr  = '^\zs.\{-\}\ze \(\(\d\+\)\|#\)\. '
+    let expr  = '^\zs.\{-\}\ze \(\(\d\+\)\|#\)\. \S.*$'
     let text  = getline(line('.'))
     let label = matchstr(text, expr)
     return label
@@ -325,34 +325,31 @@ function! RstSectionLabelize()
     "   - copies the section level of the first label
     let label = s:RstGetLabel()
     if label != ""
-        let exprtitle = '^' . label .  ' \(\(\d\+\)\|#\)\. \zs.*$'
         let currentline = line('.')
         0
-        let expr = '^' . label . ' \zs\(\(\d\+\)\|#\)\ze\. '
-        execute "silent normal! /" . expr . "\r"
+        let exprnr = '^' . label . ' \zs\(\(\d\+\)\|#\)\ze\. \S.*$'
+        execute "silent normal! /" . exprnr . "\r"
         let firstline = line('.')
-        let nr = matchstr(getline(firstline), expr)
+        let nr = matchstr(getline(firstline), exprnr)
         if nr == "#"
             let nr = 1
         endif
         let level = s:RstGetCurrentSectionLevel()
+        let exprtitle = '^' . label .  ' \(\(\d\+\)\|#\)\. \zs\S.*$'
         while 1
             let title = matchstr(getline(line('.')), exprtitle)
             let newcontent = label . " " . nr . ". " . title
             execute "silent normal! 0DI" . newcontent
             call s:RstSetSectionLevel(level)
             normal 2j
-            execute "silent normal! /" . expr . "\r"
-            let nr = nr + 1
+            execute "silent normal! /" . exprnr . "\r"
             if line('.') <= firstline
                 break
             endif
+            let nr = nr + 1
         endwhile
         execute currentline
     endif
-    " now I'm able to find out all the labels in the buffer
-    " next step is to renumber labels from first nr
-    " then apply section level
 endfunction
 
 " Add mappings, unless the user didn't want this.

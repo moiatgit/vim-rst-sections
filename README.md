@@ -125,8 +125,17 @@ RstSectionLabelize()
 
 Definition: a label is any sequence of characters from the start of a
 line followed by a white space, then a number (one or more digits) or
-a # sign, then a dot and a white space. Then it comes the title of the
-label.
+a # sign, then a dot, then a white space and then a non white space
+followed with whatever. The non white space until the rest of the line
+is considered the title of the label.
+
+The regular expression is:
+
+    ^\(.\{-\}\) \(\(\d\+\)\|#\)\. \(\S.*\)$
+
+      ^... label
+                 ^... nr
+                                   ^... title
 
 For example, the following are acceptable labels
 
