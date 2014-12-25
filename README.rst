@@ -1,5 +1,6 @@
+############
 rst-sections
-============
+############
 
 This small vim plug-in is named after matthew-brett's vim-rst-sections
 plug-in. I've completely rewritten it and dropped some features in the
@@ -11,7 +12,7 @@ unavailable) blog address:
 http://blog.tuxcoder.com/2008/12/11/vim-restructuretext-macros/
 
 Description
------------
+===========
 
 This plug-in offers the following functions:
 
@@ -38,7 +39,7 @@ This plug-in offers the following functions:
   decrease current section level.
 
 Installation
-------------
+============
 
 If you are using *Vundle* you can add the following line to your
 .vimrc
@@ -54,10 +55,10 @@ Otherwise, you can install it simply by copying the file
 
 
 Usage
------
+=====
 
 RstSetSection(level)
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 To use RstSetSection(level), just place cursor on the line you want to
 convert to a certain section level and call the function. For example:
@@ -88,7 +89,7 @@ another one from this same line and the function will change it
 properly.
 
 RstGoPrevSection() and RstGoNextSection()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------
 
 In order to jump to the previous section, just type:
 
@@ -103,7 +104,7 @@ begining/end of the buffer, these functions will continue searching
 the previous/next section by the end/begining of the buffer.
 
 RstIncrSectionLevel() and RstDecrSectionLevel()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------------
 
 In order to increment the level of the section at current line, just
 type:
@@ -121,7 +122,7 @@ border.
 top/bottom level, these functions will set the last/first level.
 
 RstSectionLabelize()
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 Definition: a label is any sequence of characters from the start of a
 line followed by a white space, then a number (one or more digits) or
@@ -204,7 +205,7 @@ function, the resulting buffer will be
 
 
 Key mapings
------------
+===========
 
 The plug-in also remaps some combination of keys in order to simplify
 this function usage.
@@ -241,7 +242,7 @@ the variable *no_rst_sections_maps* in your .vimrc. e.g:
     let no_rst_sections_maps = 0
 
 License
--------
+=======
 
 You can do whatever you want with this plug-in under the terms of the
 GNU General Public License as published by the Free Software
